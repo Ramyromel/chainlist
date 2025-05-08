@@ -14,24 +14,24 @@ export const rpcBody = JSON.stringify({
 const fetchChain = async (baseURL) => {
   if (baseURL.includes("API_KEY")) return null;
   try {
-    let API = axios.create({
+    const API = axios.create({
       baseURL,
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    API.interceptors.request.use(function (request) {
+    API.interceptors.request.use((request) => {
       request.requestStart = Date.now();
       return request;
     });
 
     API.interceptors.response.use(
-      function (response) {
+      (response) => {
         response.latency = Date.now() - response.config.requestStart;
         return response;
       },
-      function (error) {
+      (error) => {
         if (error.response) {
           error.response.latency = null;
         }
@@ -40,7 +40,7 @@ const fetchChain = async (baseURL) => {
       },
     );
 
-    let { data, latency } = await API.post("", rpcBody);
+    const { data, latency } = await API.post("", rpcBody);
 
     return { ...data, latency };
   } catch (error) {
@@ -65,7 +65,7 @@ const useHttpQuery = (url) => {
     queryKey: [url],
     queryFn: () => fetchChain(url),
     refetchInterval,
-    select: useCallback((data) => formatData(url, data), []),
+    select: useCallback((data) => formatData(url, data), [url]),
   };
 };
 
@@ -84,25 +84,24 @@ function createPromise() {
 
 const fetchWssChain = async (baseURL) => {
   try {
-    // small hack to wait until socket connection opens to show loading indicator on table row
     const queryFn = createPromise();
 
     const socket = new WebSocket(baseURL);
     let requestStart;
 
-    socket.onopen = function () {
+    socket.onopen = () => {
       socket.send(rpcBody);
       requestStart = Date.now();
     };
 
-    socket.onmessage = function (event) {
+    socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       const latency = Date.now() - requestStart;
       queryFn.resolve({ ...data, latency });
     };
 
-    socket.onerror = function (e) {
+    socket.onerror = (e) => {
       queryFn.reject(e);
     };
 
@@ -116,7 +115,7 @@ const useSocketQuery = (url) => {
   return {
     queryKey: [url],
     queryFn: () => fetchWssChain(url),
-    select: useCallback((data) => formatData(url, data), []),
+    select: useCallback((data) => formatData(url, data), [url]),
     refetchInterval,
   };
 };
