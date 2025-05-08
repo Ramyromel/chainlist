@@ -8,7 +8,7 @@ export async function connectWallet() {
       });
 
       return {
-        address: accounts && accounts.length > 0 ? (accounts[0]) : null,
+        address: accounts && accounts.length > 0 ? accounts[0] : null,
       };
     } else {
       throw new Error("No Ethereum Wallet");

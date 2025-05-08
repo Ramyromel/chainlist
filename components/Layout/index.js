@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useEffect } from "react";
 import Header from "../header";
-// import { useTranslations } from "next-intl";
 import { notTranslation as useTranslations } from "../../utils";
 import Logo from "./Logo";
 import { useRouter } from "next/router";
